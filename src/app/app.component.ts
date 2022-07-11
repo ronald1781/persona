@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { EstadosService } from './services/estados/estados.service';
 import { PaisesService } from './services/paises/paises.service';
 import { PersonasService } from './services/personas/personas.service';
@@ -10,12 +13,19 @@ import { PersonasService } from './services/personas/personas.service';
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit, AfterViewInit {
+
+  @ViewChild(MatPaginator) paginator:MatPaginator;
+  @ViewChild(MatSort) sort:MatSort;
+
 
   public personaForm: FormGroup;
   public paises: any;
   public estados: any;
   public personas: any;
+  dataSource:MatTableDataSource<any>;
+  displayedColumns:string[]=['id','name','last-name','age','country-name','state-name','options'];
+  panelOpenState=false;
 
   constructor(
     public fb: FormBuilder,
@@ -24,6 +34,9 @@ export class AppComponent {
     public personasService: PersonasService
   ) {
 
+  }
+  ngAfterViewInit(): void {
+    this.setDataAndPagination();
   }
 
   ngOnInit(): void {
@@ -68,7 +81,10 @@ export class AppComponent {
     }, error => { console.error(error) }
     )
   }
-
+/**
+*
+*@param persona
+*/
   eliminar(persona:any) {
     this.personasService.deletePersona(persona.id).subscribe(resp => {
       console.log(resp)
@@ -88,6 +104,12 @@ id:persona.id,
   pais: persona.pais,
   estado: persona.estado,
 })
+  }
+
+  setDataAndPagination(){
+    this.dataSource=new MatTableDataSource(this.personas);
+    this.dataSource.paginator=this.paginator;
+    this.dataSource.sort=this.sort;
   }
 
 }
